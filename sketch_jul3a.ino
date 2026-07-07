@@ -21,6 +21,7 @@ void setup() {
   Bluefruit.setTxPower(4);
 
   bleuart.begin();
+  bleuart.bufferTXD(true);
 
   Bluefruit.Advertising.addFlags(BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE);
   Bluefruit.Advertising.addTxPower();
@@ -54,7 +55,12 @@ void loop() {
   if (Bluefruit.connected()) {
     String data = String(ax, 3) + "," + String(ay, 3) + "," + String(az, 3) + "," +
                   String(gx, 3) + "," + String(gy, 3) + "," + String(gz, 3) + "\n";
-    bleuart.write(data.c_str(), data.length());
+    size_t written = bleuart.write(data.c_str(), data.length());
+    bleuart.flushTXD();
+
+    if (written == 0) {
+      Serial.println("BLE notify not enabled or write failed");
+    }
   }
 
   delay(50);
